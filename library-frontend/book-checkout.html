@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Checkout a Book</title>
+    </head>
+    <body>
+        <h1>Checkout a Book</h1>
+        <form>
+            <table>
+
+                <tr>
+                    <td label for="memberBarcode">Member Barcode:</td>
+                    <td><input type="text" id="memberBarcode" name="memberBarcode" required/></td>
+                </tr>
+                <tr>
+                    <td label for="bookBarcode">Book Barcode:</td>
+                    <td><input type="text" id="bookBarcode" name="bookBarcode" required/></td>
+                </tr>
+                <tr>
+                    <td><!-- Empty cell for alighment--></td>
+                    <td><input type="submit" value="Checkout"/></td>
+                </tr>
+            </table>
+        </form>
+        <br/><br/>
+        <a href="home.html">Back to Home</a>
+        <a href="javascript:history.back()">Back to Previous Page</a>
+    </body>
+
+</html>
