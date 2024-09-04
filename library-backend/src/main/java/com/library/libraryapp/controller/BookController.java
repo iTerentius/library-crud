@@ -55,5 +55,22 @@ public class BookController {
         return new ResponseEntity<>(books, HttpStatus.OK);
     }
 
+    @GetMapping("search-title-author")
+    public ResponseEntity<List<BookDTO>> searchBooksByTitleAndAuthor(@RequestParam String title,
+                                                            @RequestParam String author){
+        List<BookDTO> books = bookService.findBooksByTitleAndAuthor(title, author);
+        return new ResponseEntity<>(books, HttpStatus.OK);
+    }
+
+    @GetMapping("search")
+    public ResponseEntity<List<BookDTO>> searchBooks(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String author,
+            @RequestParam(required = false) String isbn,
+            @RequestParam(required = false) String barcodeNumber
+    ){
+        List<BookDTO> books = bookService.findBooksByCriteria(title, author, isbn, barcodeNumber);
+        return new ResponseEntity<>(books, HttpStatus.OK);
+    }
 
 }
