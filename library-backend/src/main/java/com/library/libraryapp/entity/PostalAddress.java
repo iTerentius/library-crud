@@ -1,9 +1,11 @@
 package com.library.libraryapp.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
 @Table(name = "postal_address")
+@Data
 public class PostalAddress {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
