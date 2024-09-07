@@ -22,6 +22,7 @@ public class AddressMapper {
         postalAddress.setId(dto.getId());
         postalAddress.setStreetName(dto.getStreetName());
         postalAddress.setStreetNumber(dto.getStreetNumber());
+        postalAddress.setPlaceName(dto.getPlaceName());
         postalAddress.setZipCode(dto.getZipCode());
         postalAddress.setCountry(dto.getCountry());
         postalAddress.setAdditionalInfo(dto.getAdditionalInfo());
