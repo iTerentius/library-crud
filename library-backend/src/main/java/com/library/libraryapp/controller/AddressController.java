@@ -5,10 +5,9 @@ import com.library.libraryapp.service.AddressService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -21,5 +20,17 @@ public class AddressController {
     public ResponseEntity<AddressDTO> addAddress(@RequestBody AddressDTO addressDTO) {
        AddressDTO savedAddressDTO =  addressService.createAddress(addressDTO);
        return new ResponseEntity<>(savedAddressDTO, HttpStatus.CREATED);
+    }
+
+    @GetMapping("listAll")
+    public ResponseEntity<List<AddressDTO>> getAllAddress(){
+       List<AddressDTO> allAddresses = addressService.getAllAddresses();
+       return new ResponseEntity<>(allAddresses, HttpStatus.OK);
+    }
+
+    @GetMapping("{id}")
+    public ResponseEntity<AddressDTO> getAddressById(@PathVariable Long id){
+       AddressDTO addressDTO =  addressService.getAddressById(id);
+       return new ResponseEntity<>(addressDTO, HttpStatus.OK);
     }
 }
