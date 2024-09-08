@@ -39,4 +39,26 @@ public class AddressServiceImpl implements AddressService {
         PostalAddress postalAddress = optionalPostalAddress.get();
         return AddressMapper.mapToAddressDTO(postalAddress);
     }
+
+    @Override
+    public AddressDTO updateAddress(AddressDTO addressDTO) {
+        // 1. Find existing by ID
+        Optional<PostalAddress> optionalPostalAddress = addressRepository.findById(addressDTO.getId());
+        PostalAddress addressToUpdate = optionalPostalAddress.get();
+        // 2. Do partial update of the address
+        updateAddressEntityFromDTO(addressToUpdate, addressDTO);
+        // 3. Save updated address in DB
+        PostalAddress updatedAddress = addressRepository.save(addressToUpdate);
+        // 4. Return Address DTO using Mapper
+        return AddressMapper.mapToAddressDTO(updatedAddress);
+    }
+
+    private void updateAddressEntityFromDTO(PostalAddress addressToUpdate, AddressDTO addressDTO) {
+        if(addressDTO.getStreetName() != null) addressToUpdate.setStreetName(addressDTO.getStreetName());
+        if(addressDTO.getStreetNumber() != null) addressToUpdate.setStreetNumber(addressDTO.getStreetNumber());
+        if(addressDTO.getZipCode() != null) addressToUpdate.setZipCode(addressDTO.getZipCode());
+        if(addressDTO.getPlaceName() != null) addressToUpdate.setPlaceName(addressDTO.getPlaceName());
+        if(addressDTO.getCountry() != null) addressToUpdate.setCountry(addressDTO.getCountry());
+        if(addressDTO.getAdditionalInfo() != null) addressToUpdate.setAdditionalInfo(addressDTO.getAdditionalInfo());
+    }
 }
