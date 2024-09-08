@@ -13,4 +13,6 @@ public interface AddressService {
     AddressDTO getAddressById(Long id);
 
     AddressDTO updateAddress(AddressDTO addressDTO);
+
+    void deleteAddress(Long id);
 }
