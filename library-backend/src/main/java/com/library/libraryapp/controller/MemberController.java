@@ -5,10 +5,9 @@ import com.library.libraryapp.service.MemberService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -21,5 +20,17 @@ public class MemberController {
     public ResponseEntity<MemberDTO> addMember(@RequestBody MemberDTO memberDTO){
        MemberDTO savedMember = memberService.addMember(memberDTO);
        return new ResponseEntity<>(savedMember, HttpStatus.CREATED);
+    }
+
+    @GetMapping("listAll")
+    public ResponseEntity<List<MemberDTO>> getAllMembers(){
+       List<MemberDTO> allMembers = memberService.getAllMembers();
+       return new ResponseEntity<>(allMembers, HttpStatus.OK);
+    }
+
+    @GetMapping("{id}")
+    public ResponseEntity<MemberDTO> getMemberByID(@PathVariable Long id){
+       MemberDTO memberDTO = memberService.getMemberByID(id);
+       return new ResponseEntity<>(memberDTO, HttpStatus.OK);
     }
 }
