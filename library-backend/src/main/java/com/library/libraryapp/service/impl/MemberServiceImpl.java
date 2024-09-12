@@ -8,11 +8,13 @@ import com.library.libraryapp.mapper.AddressMapper;
 import com.library.libraryapp.mapper.MemberMapper;
 import com.library.libraryapp.repository.AddressRepository;
 import com.library.libraryapp.repository.MemberRepository;
+import com.library.libraryapp.service.AddressService;
 import com.library.libraryapp.service.MemberService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -24,6 +26,8 @@ public class MemberServiceImpl implements MemberService {
     private AddressRepository addressRepository;
 
     private MemberRepository memberRepository;
+
+    private AddressServiceImpl addressService;
 
     @Override
     @Transactional
@@ -65,5 +69,60 @@ public class MemberServiceImpl implements MemberService {
         Member member = optionalMember.get();
 
         return MemberMapper.mapToMemberDTO(member);
+    }
+
+    @Override
+    public MemberDTO updateMember(MemberDTO memberDTO) {
+        // 1. find existing member by id
+        Optional<Member> optionalMember = memberRepository.findById(memberDTO.getId());
+        Member memberToUpdate = optionalMember.get();
+
+        // 2. do partial update of the member (only non-null fields)
+        updateMemberEntityFromDTO(memberToUpdate, memberDTO);
+
+        // 3. save update member to DB
+        memberRepository.save(memberToUpdate);
+
+        // 4. return updated member (DTO)
+        return MemberMapper.mapToMemberDTO(memberToUpdate);
+    }
+
+    private void updateMemberEntityFromDTO(Member memberToUpdate, MemberDTO memberDTO) {
+        if(memberDTO.getFirstName() != null) memberToUpdate.setFirstName(memberDTO.getFirstName());
+        if(memberDTO.getLastName() != null) memberToUpdate.setLastName(memberDTO.getLastName());
+        if(memberDTO.getDateOfBirth() != null) memberToUpdate.setDateOfBirth(LocalDate.parse(memberDTO.getDateOfBirth()));
+        if(memberDTO.getEmail() != null) memberToUpdate.setEmail(memberDTO.getEmail());
+        if(memberDTO.getPhone() != null) memberToUpdate.setPhone(memberDTO.getPhone());
+        if(memberDTO.getBarcodeNumber() != null) memberToUpdate.setBarcodeNumber(memberDTO.getBarcodeNumber());
+        if(memberDTO.getMembershipStarted() != null) memberToUpdate.setMembershipStarted(LocalDate.parse(memberDTO.getMembershipStarted()));
+
+        // the member is active if membershipEnded = null;
+        if(memberDTO.getMembershipEnded() != null) {
+            if (memberDTO.getMembershipEnded().isEmpty()){
+                memberToUpdate.setMembershipEnded(null);
+                memberToUpdate.setIsActive(true);
+            } else {
+                memberToUpdate.setMembershipEnded(LocalDate.parse(memberDTO.getMembershipEnded()));
+                memberToUpdate.setIsActive(false);
+            }
+        }
+        // udpate the address
+        if(memberDTO.getAddress() != null){
+            // if the member already has an address, update it
+            // otherwise create a new PostalAddress entity
+            PostalAddress addressToUpdate;
+
+            if(memberToUpdate.getPostalAddress() != null){
+                addressToUpdate = memberToUpdate.getPostalAddress();
+            } else {
+                addressToUpdate = new PostalAddress();
+            }
+            // to update PostalAddress entity, we will use our existing address service
+            addressService.updateAddressEntityFromDTO(addressToUpdate, memberDTO.getAddress());
+            // save the updated address to DB
+            addressRepository.save(addressToUpdate);
+            // associate the updated address with the member
+            memberToUpdate.setPostalAddress(addressToUpdate);
+        }
     }
 }

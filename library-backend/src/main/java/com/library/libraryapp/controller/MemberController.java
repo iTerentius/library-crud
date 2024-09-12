@@ -33,4 +33,11 @@ public class MemberController {
        MemberDTO memberDTO = memberService.getMemberByID(id);
        return new ResponseEntity<>(memberDTO, HttpStatus.OK);
     }
+
+    @PatchMapping("updateMember/{id}")
+    public ResponseEntity<MemberDTO> updateMember(@PathVariable Long id, @RequestBody MemberDTO memberDTO){
+        memberDTO.setId(id);
+        MemberDTO updatedMember = memberService.updateMember(memberDTO);
+        return new ResponseEntity<>(updatedMember, HttpStatus.OK);
+    }
 }

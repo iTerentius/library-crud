@@ -58,7 +58,7 @@ public class AddressServiceImpl implements AddressService {
         addressRepository.deleteById(id);
     }
 
-    private void updateAddressEntityFromDTO(PostalAddress addressToUpdate, AddressDTO addressDTO) {
+    public void updateAddressEntityFromDTO(PostalAddress addressToUpdate, AddressDTO addressDTO) {
         if(addressDTO.getStreetName() != null) addressToUpdate.setStreetName(addressDTO.getStreetName());
         if(addressDTO.getStreetNumber() != null) addressToUpdate.setStreetNumber(addressDTO.getStreetNumber());
         if(addressDTO.getZipCode() != null) addressToUpdate.setZipCode(addressDTO.getZipCode());
