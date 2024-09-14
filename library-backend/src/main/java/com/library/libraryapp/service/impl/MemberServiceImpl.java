@@ -72,6 +72,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    @Transactional
     public MemberDTO updateMember(MemberDTO memberDTO) {
         // 1. find existing member by id
         Optional<Member> optionalMember = memberRepository.findById(memberDTO.getId());
@@ -85,6 +86,11 @@ public class MemberServiceImpl implements MemberService {
 
         // 4. return updated member (DTO)
         return MemberMapper.mapToMemberDTO(memberToUpdate);
+    }
+
+    @Override
+    public void deleteMember(Long id) {
+        memberRepository.deleteById(id);
     }
 
     private void updateMemberEntityFromDTO(Member memberToUpdate, MemberDTO memberDTO) {

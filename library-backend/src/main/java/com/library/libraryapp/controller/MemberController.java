@@ -40,4 +40,10 @@ public class MemberController {
         MemberDTO updatedMember = memberService.updateMember(memberDTO);
         return new ResponseEntity<>(updatedMember, HttpStatus.OK);
     }
+
+    @DeleteMapping("deleteMember/{id}")
+    public ResponseEntity<String> deleteMemberById(@PathVariable Long id){
+        memberService.deleteMember(id);
+        return new ResponseEntity<String>("Member has been successfully deleted.", HttpStatus.OK);
+    }
 }
