@@ -22,7 +22,7 @@ public class Member {
     @Column(nullable = false)
     private LocalDate dateOfBirth;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "postal_address_id")
     private PostalAddress postalAddress;
 

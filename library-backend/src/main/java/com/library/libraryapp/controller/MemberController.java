@@ -44,6 +44,6 @@ public class MemberController {
     @DeleteMapping("deleteMember/{id}")
     public ResponseEntity<String> deleteMemberById(@PathVariable Long id){
         memberService.deleteMember(id);
-        return new ResponseEntity<String>("Member has been successfully deleted.", HttpStatus.OK);
+        return new ResponseEntity<>("Member has been successfully deleted.", HttpStatus.OK);
     }
 }
