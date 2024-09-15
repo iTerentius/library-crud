@@ -46,4 +46,16 @@ public class MemberController {
         memberService.deleteMember(id);
         return new ResponseEntity<>("Member has been successfully deleted.", HttpStatus.OK);
     }
+
+    @GetMapping("search")
+    public ResponseEntity<List<MemberDTO>> searchMembers(
+            @RequestParam(required = false) Long cardNumber,
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String lastName,
+            @RequestParam(required = false) String barcodeNumber
+    ){
+        List<MemberDTO> members = memberService.findMembersByCriteria(cardNumber, firstName, lastName, barcodeNumber);
+
+        return new ResponseEntity<>(members, HttpStatus.OK);
+    }
 }

@@ -10,11 +10,18 @@ import com.library.libraryapp.repository.AddressRepository;
 import com.library.libraryapp.repository.MemberRepository;
 import com.library.libraryapp.service.AddressService;
 import com.library.libraryapp.service.MemberService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -28,6 +35,9 @@ public class MemberServiceImpl implements MemberService {
     private MemberRepository memberRepository;
 
     private AddressServiceImpl addressService;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Override
     @Transactional
@@ -91,6 +101,30 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public void deleteMember(Long id) {
         memberRepository.deleteById(id);
+    }
+
+    @Override
+    public List<MemberDTO> findMembersByCriteria(Long id, String firstName, String lastName, String barcodeNumber) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Member> cq = cb.createQuery(Member.class);
+        Root<Member> memberRoot = cq.from(Member.class);
+        List<Predicate> predicates = new ArrayList<>();
+
+        if(id != null) predicates.add(cb.equal(memberRoot.get("id"), id));
+        if(firstName != null)
+            predicates.add(cb.like(cb.lower(memberRoot.get("firstName")), "%" + firstName.toLowerCase() + "%"));
+        if(lastName != null)
+            predicates.add(cb.like(cb.lower(memberRoot.get("lastName")), "%" + lastName.toLowerCase() + "%"));
+        if(barcodeNumber != null)
+            predicates.add(cb.like(cb.lower(memberRoot.get("barcodeNumber")), "%" + barcodeNumber.toLowerCase() + "%"));
+
+        cq.where(cb.and(predicates.toArray(new Predicate[0])));
+
+        List<Member> result = entityManager.createQuery(cq).getResultList();
+
+        return result.stream()
+                .map(MemberMapper::mapToMemberDTO)
+                .collect(Collectors.toList());
     }
 
     private void updateMemberEntityFromDTO(Member memberToUpdate, MemberDTO memberDTO) {

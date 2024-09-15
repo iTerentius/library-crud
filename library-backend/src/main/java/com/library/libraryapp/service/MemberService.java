@@ -15,4 +15,6 @@ public interface MemberService {
    MemberDTO updateMember(MemberDTO memberDTO);
 
    void deleteMember(Long id);
+
+   List<MemberDTO> findMembersByCriteria(Long id, String firstName, String lastName, String barcodeNumber);
 }
