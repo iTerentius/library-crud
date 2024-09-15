@@ -1,12 +1,13 @@
 package com.library.libraryapp.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalDate;
 
 @Entity
 @Table
-
+@Data
 public class CheckoutRegister {
 
     @Id
