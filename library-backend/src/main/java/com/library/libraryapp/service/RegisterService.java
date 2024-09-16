@@ -11,4 +11,6 @@ public interface RegisterService {
    List<RegisterDTO> getAllRegisters();
 
    RegisterDTO getRegisterById(Long id);
+
+   RegisterDTO updateRegister(RegisterDTO registerDTO);
 }

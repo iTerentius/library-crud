@@ -34,4 +34,11 @@ public class RegisterController {
        RegisterDTO register = registerService.getRegisterById(id);
        return new ResponseEntity<>(register, HttpStatus.OK);
     }
+
+    @PatchMapping("updateRegister/{id}")
+    public ResponseEntity<RegisterDTO> updateRegister(@PathVariable Long id, @RequestBody RegisterDTO registerDTO){
+        registerDTO.setId(id);
+        RegisterDTO updatedRegister = registerService.updateRegister(registerDTO);
+        return new ResponseEntity<>(updatedRegister, HttpStatus.OK);
+    }
 }

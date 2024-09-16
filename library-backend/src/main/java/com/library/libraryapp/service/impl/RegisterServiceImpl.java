@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -20,6 +21,9 @@ import java.util.stream.Collectors;
 public class RegisterServiceImpl implements RegisterService {
     @Value("${library.loanPeriodInDays}")
     private int loanPeriodInDays;
+
+    @Value("${library.overdueFineRate}")
+    private double overdueFineRate;
 
     private final RegisterMapper registerMapper;
 
@@ -51,6 +55,43 @@ public class RegisterServiceImpl implements RegisterService {
         CheckoutRegister checkoutRegister = checkoutRegisterOptional.get();
 
         return registerMapper.mapToRegisterDTO(checkoutRegister);
+    }
+
+    @Override
+    public RegisterDTO updateRegister(RegisterDTO registerDTO) {
+        // find existing register by ID
+        Optional<CheckoutRegister> checkoutRegisterOptional =  checkoutRegistryRepository.findById(registerDTO.getId());
+        CheckoutRegister checkoutRegisterToUpdate = checkoutRegisterOptional.get();
+
+        // do partial update
+        updateCheckoutRegisterFromDTO(checkoutRegisterToUpdate, registerDTO);
+
+        // calculate overdue fine
+        calculateOverdueFine(checkoutRegisterToUpdate);
+
+        // save updated register to DB
+        CheckoutRegister updatedCheckoutRegister = checkoutRegistryRepository.save(checkoutRegisterToUpdate);
+
+        // return register DTO via Mapper
+        return registerMapper.mapToRegisterDTO(updatedCheckoutRegister);
+    }
+
+    private void calculateOverdueFine(CheckoutRegister checkoutRegister) {
+        if(checkoutRegister.getReturnDate() != null &&
+            checkoutRegister.getReturnDate().isAfter(checkoutRegister.getDueDate())) {
+            long daysOverdue = ChronoUnit.DAYS.between(checkoutRegister.getDueDate(), checkoutRegister.getReturnDate());
+            // overdue fine = daysOverdue * overdueFineRate
+            double overdueFine = daysOverdue * overdueFineRate;
+            checkoutRegister.setOverdueFine(overdueFine);
+        }
+    }
+
+    private void updateCheckoutRegisterFromDTO(CheckoutRegister checkoutRegisterToUpdate, RegisterDTO registerDTO) {
+        // the user can either prolong the due date of the book or record the return of the book
+        if(registerDTO.getReturnDate() != null)
+            checkoutRegisterToUpdate.setDueDate(LocalDate.parse(registerDTO.getDueDate()));
+        if(registerDTO.getReturnDate() != null)
+            checkoutRegisterToUpdate.setReturnDate(LocalDate.parse(registerDTO.getReturnDate()));
     }
 
     private LocalDate calculateDueDate(LocalDate checkoutDate) {
