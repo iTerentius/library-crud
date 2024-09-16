@@ -76,6 +76,11 @@ public class RegisterServiceImpl implements RegisterService {
         return registerMapper.mapToRegisterDTO(updatedCheckoutRegister);
     }
 
+    @Override
+    public void deleteRegister(Long id) {
+        checkoutRegistryRepository.deleteById(id);
+    }
+
     private void calculateOverdueFine(CheckoutRegister checkoutRegister) {
         if(checkoutRegister.getReturnDate() != null &&
             checkoutRegister.getReturnDate().isAfter(checkoutRegister.getDueDate())) {

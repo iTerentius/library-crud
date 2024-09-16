@@ -41,4 +41,10 @@ public class RegisterController {
         RegisterDTO updatedRegister = registerService.updateRegister(registerDTO);
         return new ResponseEntity<>(updatedRegister, HttpStatus.OK);
     }
+
+    @DeleteMapping("deleteRegister/{id}")
+    public ResponseEntity<String> deleteRegister(@PathVariable Long id){
+        registerService.deleteRegister(id);
+        return new ResponseEntity<>("Checkout register successfully deleted.", HttpStatus.OK);
+    }
 }
