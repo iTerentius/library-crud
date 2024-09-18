@@ -1,6 +1,7 @@
 package com.library.libraryapp.controller;
 
 import com.library.libraryapp.dto.RegisterDTO;
+import com.library.libraryapp.entity.CheckoutRegister;
 import com.library.libraryapp.service.RegisterService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -46,5 +47,17 @@ public class RegisterController {
     public ResponseEntity<String> deleteRegister(@PathVariable Long id){
         registerService.deleteRegister(id);
         return new ResponseEntity<>("Checkout register successfully deleted.", HttpStatus.OK);
+    }
+
+    @GetMapping("member/{memberId}")
+    public ResponseEntity<List<RegisterDTO>> getRegistersByMember(@PathVariable Long memberId){
+       List<RegisterDTO> registers = registerService.getRegisterByMemberId(memberId);
+       return new ResponseEntity<>(registers, HttpStatus.OK);
+    }
+
+    @GetMapping("book/{bookId}")
+    public ResponseEntity<List<RegisterDTO>> getRegistersByBook(@PathVariable Long bookId){
+        List<RegisterDTO> registers = registerService.getRegisterByBookId(bookId);
+        return new ResponseEntity<>(registers, HttpStatus.OK);
     }
 }

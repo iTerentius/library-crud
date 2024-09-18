@@ -1,5 +1,6 @@
 package com.library.libraryapp.service;
 
+import com.library.libraryapp.dto.BookDTO;
 import com.library.libraryapp.dto.RegisterDTO;
 import com.library.libraryapp.entity.CheckoutRegister;
 
@@ -15,4 +16,8 @@ public interface RegisterService {
    RegisterDTO updateRegister(RegisterDTO registerDTO);
 
    void deleteRegister(Long id);
+
+   List<RegisterDTO> getRegisterByMemberId(Long memberId);
+
+   List<RegisterDTO> getRegisterByBookId(Long bookId);
 }
