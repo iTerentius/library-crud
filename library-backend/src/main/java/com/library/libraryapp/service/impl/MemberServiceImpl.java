@@ -2,8 +2,10 @@ package com.library.libraryapp.service.impl;
 
 import com.library.libraryapp.dto.AddressDTO;
 import com.library.libraryapp.dto.MemberDTO;
+import com.library.libraryapp.entity.Book;
 import com.library.libraryapp.entity.Member;
 import com.library.libraryapp.entity.PostalAddress;
+import com.library.libraryapp.exception.ResourceNotFoundException;
 import com.library.libraryapp.mapper.AddressMapper;
 import com.library.libraryapp.mapper.MemberMapper;
 import com.library.libraryapp.repository.AddressRepository;
@@ -72,11 +74,11 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public MemberDTO getMemberByID(Long id) {
+    public MemberDTO getMemberByID(Long memberId) {
 
-        Optional<Member> optionalMember = memberRepository.findById(id);
-
-        Member member = optionalMember.get();
+//        Optional<Member> optionalMember = memberRepository.findById(id);
+        Member member = memberRepository.findById(memberId).orElseThrow(
+                () -> new ResourceNotFoundException("Member", "ID", memberId));
 
         return MemberMapper.mapToMemberDTO(member);
     }
@@ -86,7 +88,9 @@ public class MemberServiceImpl implements MemberService {
     public MemberDTO updateMember(MemberDTO memberDTO) {
         // 1. find existing member by id
         Optional<Member> optionalMember = memberRepository.findById(memberDTO.getId());
-        Member memberToUpdate = optionalMember.get();
+        Member memberToUpdate = optionalMember.orElseThrow(
+                () -> new ResourceNotFoundException("Member", "ID", memberDTO.getId())
+        );
 
         // 2. do partial update of the member (only non-null fields)
         updateMemberEntityFromDTO(memberToUpdate, memberDTO);
@@ -99,8 +103,11 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public void deleteMember(Long id) {
-        memberRepository.deleteById(id);
+    public void deleteMember(Long memberId) {
+        if(!memberRepository.existsById(memberId)){
+            throw new ResourceNotFoundException("Member", "ID", memberId);
+        }
+        memberRepository.deleteById(memberId);
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.library.libraryapp.service.impl;
 
 import com.library.libraryapp.dto.BookDTO;
 import com.library.libraryapp.entity.Book;
+import com.library.libraryapp.exception.ResourceNotFoundException;
 import com.library.libraryapp.mapper.BookMapper;
 import com.library.libraryapp.repository.BookRepository;
 import com.library.libraryapp.service.BookService;
@@ -49,8 +50,10 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookDTO getBookById(Long bookId) {
-        Optional<Book> optionalBook = bookRepository.findById(bookId);
-        Book book = optionalBook.get();
+//        Optional<Book> optionalBook = bookRepository.findById(bookId);
+//        Book book = optionalBook.get();
+        Book book = bookRepository.findById(bookId).orElseThrow(
+                () -> new ResourceNotFoundException("Book", "ID", bookId));
         return BookMapper.mapToBookDTO(book);
     }
 
@@ -59,7 +62,9 @@ public class BookServiceImpl implements BookService {
         //1. find the existing book by id
         Optional<Book> bookOptional = bookRepository.findById(bookDTO.getId());
         //2. do partial update of the book (we will update only non-null fields)
-        Book bookToUpdate = bookOptional.get();
+        Book bookToUpdate = bookOptional.orElseThrow(
+                () -> new ResourceNotFoundException("Book", "ID", bookDTO.getId())
+        );
         updateBookEntityFromDTO(bookToUpdate, bookDTO);
         //3. save update updated book to db
         Book savedBook = bookRepository.save(bookToUpdate);
@@ -70,6 +75,10 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public void deleteBook(Long bookId) {
+        if(!bookRepository.existsById(bookId)){
+            throw new ResourceNotFoundException("Book", "ID", bookId);
+        }
+
         bookRepository.deleteById(bookId);
     }
 
