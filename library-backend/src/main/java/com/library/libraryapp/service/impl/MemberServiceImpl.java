@@ -20,6 +20,8 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -31,6 +33,8 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class MemberServiceImpl implements MemberService {
+
+    private static final Logger logger = LoggerFactory.getLogger(MemberServiceImpl.class);
 
     private AddressRepository addressRepository;
 
@@ -44,6 +48,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public MemberDTO addMember(MemberDTO memberDTO) {
+        logger.info("Trying to add a member: {}", memberDTO);
         PostalAddress postalAddress = new PostalAddress();
         // first we have to deal with postal_address
         AddressDTO addressDTO = memberDTO.getAddress();
@@ -53,13 +58,14 @@ public class MemberServiceImpl implements MemberService {
         }
         // convert memberDTO to member Entity
         Member member = MemberMapper.mapToMemberEntity(memberDTO);
+        logger.info("Member entity after mapping: {}", member);
 
         // add the address in the Entity (set postal address ID field in DB)
         if(postalAddress != null) member.setPostalAddress(postalAddress);
 
         // save the Entity in the DB
         member = memberRepository.save(member);
-
+        logger.info("The member successfully saved in the database: {}", member);
         // convert the Entity back to DTO and return it
         return MemberMapper.mapToMemberDTO(member);
     }
@@ -68,6 +74,7 @@ public class MemberServiceImpl implements MemberService {
     public List<MemberDTO> getAllMembers() {
 
         List<Member> members = memberRepository.findAll();
+        logger.info("Retrieve all members: {}", members);
         return members.stream()
                 .map(MemberMapper::mapToMemberDTO)
                 .collect(Collectors.toList());
@@ -86,6 +93,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public MemberDTO updateMember(MemberDTO memberDTO) {
+        logger.info("Try to update member by ID: {}", memberDTO);
         // 1. find existing member by id
         Optional<Member> optionalMember = memberRepository.findById(memberDTO.getId());
         Member memberToUpdate = optionalMember.orElseThrow(
@@ -96,14 +104,15 @@ public class MemberServiceImpl implements MemberService {
         updateMemberEntityFromDTO(memberToUpdate, memberDTO);
 
         // 3. save update member to DB
-        memberRepository.save(memberToUpdate);
-
+        Member savedMember = memberRepository.save(memberToUpdate);
+        logger.info("Member successfully save: {}", savedMember);
         // 4. return updated member (DTO)
         return MemberMapper.mapToMemberDTO(memberToUpdate);
     }
 
     @Override
     public void deleteMember(Long memberId) {
+        logger.info("Deleting book by ID: {}", memberId);
         if(!memberRepository.existsById(memberId)){
             throw new ResourceNotFoundException("Member", "ID", memberId);
         }
@@ -124,11 +133,11 @@ public class MemberServiceImpl implements MemberService {
             predicates.add(cb.like(cb.lower(memberRoot.get("lastName")), "%" + lastName.toLowerCase() + "%"));
         if(barcodeNumber != null)
             predicates.add(cb.like(cb.lower(memberRoot.get("barcodeNumber")), "%" + barcodeNumber.toLowerCase() + "%"));
-
+        logger.info("Retrieve members by criteria: {}", predicates);
         cq.where(cb.and(predicates.toArray(new Predicate[0])));
 
         List<Member> result = entityManager.createQuery(cq).getResultList();
-
+        logger.info("Members found by criteria: {}", result);
         return result.stream()
                 .map(MemberMapper::mapToMemberDTO)
                 .collect(Collectors.toList());

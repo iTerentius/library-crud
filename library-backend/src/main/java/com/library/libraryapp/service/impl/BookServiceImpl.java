@@ -12,6 +12,8 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -25,15 +27,20 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class BookServiceImpl implements BookService {
 
+    private static final Logger logger = LoggerFactory.getLogger(BookServiceImpl.class);
+
     private BookRepository bookRepository;
 
     private EntityManager entityManager;
 
     @Override
     public BookDTO addBook(BookDTO bookDTO) {
+        logger.info("Trying to add a book: {}", bookDTO);
         Book book = BookMapper.mapToBookEntity(bookDTO);
+        logger.info("Book entity after mapping: {}", book);
         // CREATE book in DB
         book = bookRepository.save(book);
+        logger.info("The book successfully saved in database: {}", book);
         return BookMapper.mapToBookDTO(book);
     }
 
@@ -43,6 +50,7 @@ public class BookServiceImpl implements BookService {
         // we have to iterate over the list of entities
         // then map every entity to dto,
         // then return the list of dto's
+        logger.info("Retrieve all books: {}", books);
         return books.stream()
                 .map(BookMapper::mapToBookDTO)
                 .collect(Collectors.toList());
@@ -52,6 +60,7 @@ public class BookServiceImpl implements BookService {
     public BookDTO getBookById(Long bookId) {
 //        Optional<Book> optionalBook = bookRepository.findById(bookId);
 //        Book book = optionalBook.get();
+        logger.info("Retrieve book by ID: {}", bookId);
         Book book = bookRepository.findById(bookId).orElseThrow(
                 () -> new ResourceNotFoundException("Book", "ID", bookId));
         return BookMapper.mapToBookDTO(book);
@@ -59,6 +68,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BookDTO updateBook(BookDTO bookDTO) {
+        logger.info("Try to update book by ID: {}", bookDTO);
         //1. find the existing book by id
         Optional<Book> bookOptional = bookRepository.findById(bookDTO.getId());
         //2. do partial update of the book (we will update only non-null fields)
@@ -68,6 +78,7 @@ public class BookServiceImpl implements BookService {
         updateBookEntityFromDTO(bookToUpdate, bookDTO);
         //3. save update updated book to db
         Book savedBook = bookRepository.save(bookToUpdate);
+        logger.info("Book successfully saved: {}", savedBook);
         //4. return existing book dto
 
         return BookMapper.mapToBookDTO(savedBook);
@@ -75,6 +86,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public void deleteBook(Long bookId) {
+        logger.info("Deleting book by ID: {}", bookId);
         if(!bookRepository.existsById(bookId)){
             throw new ResourceNotFoundException("Book", "ID", bookId);
         }
@@ -84,7 +96,9 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public List<BookDTO> findBooksByTitle(String title) {
+        logger.info("Retrieve book by title: {}", title);
         List<Book> books = bookRepository.findByTitleContainingIgnoreCase(title);
+        logger.info("Books found by title: {}", books);
         return books.stream()
                 .map(BookMapper::mapToBookDTO)
                 .collect(Collectors.toList());
@@ -92,7 +106,10 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public List<BookDTO> findBooksByTitleAndAuthor(String title, String author) {
+        logger.info("Retrieve book by title: {}", title);
+        logger.info("Retrieve book by author: {}", author);
         List<Book> books = bookRepository.findByTitleAndAuthorContainingIgnoreCase(title, author);
+        logger.info("Books found by title and author", books);
         return books.stream()
                 .map(BookMapper::mapToBookDTO)
                 .collect(Collectors.toList());
@@ -116,10 +133,10 @@ public class BookServiceImpl implements BookService {
         if(barcodeNumber != null && !barcodeNumber.isEmpty()){
             predicates.add(cb.like(cb.lower(book.get("barcodeNumber")), "%" + barcodeNumber.toLowerCase() + "%"));
         }
-
+        logger.info("Retrieve books by criteria: {}", predicates);
         cq.where(cb.and(predicates.toArray(new Predicate[0])));
         List<Book> result = entityManager.createQuery(cq).getResultList();
-
+        logger.info("Books found by criteria: {}", result);
         return result.stream()
                 .map(BookMapper::mapToBookDTO)
                 .collect(Collectors.toList());

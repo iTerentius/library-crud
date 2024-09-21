@@ -8,6 +8,8 @@ import com.library.libraryapp.repository.CheckoutRegistryRepository;
 import com.library.libraryapp.service.RegisterService;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +22,9 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class RegisterServiceImpl implements RegisterService {
+
+    private static final Logger logger = LoggerFactory.getLogger(RegisterServiceImpl.class);
+
     @Value("${library.loanPeriodInDays}")
     private int loanPeriodInDays;
 
@@ -32,6 +37,7 @@ public class RegisterServiceImpl implements RegisterService {
 
     @Override
     public RegisterDTO createRegister(RegisterDTO registerDTO) {
+        logger.info("Trying to add a checkout register: {}", registerDTO);
         CheckoutRegister checkoutRegister = registerMapper.mapToCheckoutRegisterEntity(registerDTO);
 
         // caluclate due date
@@ -39,12 +45,14 @@ public class RegisterServiceImpl implements RegisterService {
         checkoutRegister.setDueDate(dueDate);
 
         checkoutRegister = checkoutRegistryRepository.save(checkoutRegister);
+        logger.info("The checkout register successfully saved in the database: {}", checkoutRegister);
         return registerMapper.mapToRegisterDTO(checkoutRegister);
     }
 
     @Override
     public List<RegisterDTO> getAllRegisters() {
         List<CheckoutRegister> checkoutRegisters = checkoutRegistryRepository.findAll();
+        logger.info("Retrieve all checkout registers: {}", checkoutRegisters);
         return checkoutRegisters.stream()
                 .map(registerMapper::mapToRegisterDTO)
                 .collect(Collectors.toList());
@@ -52,6 +60,7 @@ public class RegisterServiceImpl implements RegisterService {
 
     @Override
     public RegisterDTO getRegisterById(Long id) {
+        logger.info("Retrieve checkout register by ID: {}", id);
         Optional<CheckoutRegister> checkoutRegisterOptional = checkoutRegistryRepository.findById(id);
         CheckoutRegister checkoutRegister = checkoutRegisterOptional.orElseThrow(
                 () -> new ResourceNotFoundException("Checkout Register", "ID", id)
@@ -62,6 +71,7 @@ public class RegisterServiceImpl implements RegisterService {
 
     @Override
     public RegisterDTO updateRegister(RegisterDTO registerDTO) {
+        logger.info("Try to update checkout register: {}", registerDTO);
         // find existing register by ID
         Optional<CheckoutRegister> checkoutRegisterOptional =  checkoutRegistryRepository.findById(registerDTO.getId());
         CheckoutRegister checkoutRegisterToUpdate = checkoutRegisterOptional.orElseThrow(
@@ -76,13 +86,14 @@ public class RegisterServiceImpl implements RegisterService {
 
         // save updated register to DB
         CheckoutRegister updatedCheckoutRegister = checkoutRegistryRepository.save(checkoutRegisterToUpdate);
-
+        logger.info("Checkout register successfully saved: {}", updatedCheckoutRegister);
         // return register DTO via Mapper
         return registerMapper.mapToRegisterDTO(updatedCheckoutRegister);
     }
 
     @Override
     public void deleteRegister(Long id) {
+        logger.info("Deleting checkout register by ID: {}", id);
         if(!checkoutRegistryRepository.existsById(id)){
             throw new ResourceNotFoundException("Checkout Register", "ID", id);
         }
@@ -91,7 +102,9 @@ public class RegisterServiceImpl implements RegisterService {
 
     @Override
     public List<RegisterDTO> getRegisterByMemberId(Long memberId) {
+        logger.info("Retrieve checkout registers by member id: {}", memberId);
         List<CheckoutRegister> checkoutRegisters = checkoutRegistryRepository.findByMemberId(memberId);
+        logger.info("Checkout registers found by member id: {}", checkoutRegisters);
         return checkoutRegisters.stream()
                 .map(registerMapper::mapToRegisterDTO)
                 .collect(Collectors.toList());
@@ -99,7 +112,9 @@ public class RegisterServiceImpl implements RegisterService {
 
     @Override
     public List<RegisterDTO> getRegisterByBookId(Long bookId) {
+        logger.info("Retrieve checkout registers by book id: {}", bookId);
         List<CheckoutRegister> checkoutRegisters = checkoutRegistryRepository.findByBookId(bookId);
+        logger.info("Checkout registers found by book id: {}", checkoutRegisters);
         return checkoutRegisters.stream()
                 .map(registerMapper::mapToRegisterDTO)
                 .collect(Collectors.toList());
