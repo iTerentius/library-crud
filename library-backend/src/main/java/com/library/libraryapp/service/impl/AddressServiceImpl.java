@@ -2,6 +2,7 @@ package com.library.libraryapp.service.impl;
 
 import com.library.libraryapp.dto.AddressDTO;
 import com.library.libraryapp.entity.PostalAddress;
+import com.library.libraryapp.exception.ResourceNotFoundException;
 import com.library.libraryapp.mapper.AddressMapper;
 import com.library.libraryapp.repository.AddressRepository;
 import com.library.libraryapp.service.AddressService;
@@ -36,7 +37,8 @@ public class AddressServiceImpl implements AddressService {
     @Override
     public AddressDTO getAddressById(Long id) {
         Optional<PostalAddress> optionalPostalAddress = addressRepository.findById(id);
-        PostalAddress postalAddress = optionalPostalAddress.get();
+        PostalAddress postalAddress = optionalPostalAddress.orElseThrow(
+                () -> new ResourceNotFoundException("Address", "ID", id));
         return AddressMapper.mapToAddressDTO(postalAddress);
     }
 
@@ -44,7 +46,9 @@ public class AddressServiceImpl implements AddressService {
     public AddressDTO updateAddress(AddressDTO addressDTO) {
         // 1. Find existing by ID
         Optional<PostalAddress> optionalPostalAddress = addressRepository.findById(addressDTO.getId());
-        PostalAddress addressToUpdate = optionalPostalAddress.get();
+        PostalAddress addressToUpdate = optionalPostalAddress.orElseThrow(
+                () -> new ResourceNotFoundException("Address", "ID", addressDTO.getId())
+        );
         // 2. Do partial update of the address
         updateAddressEntityFromDTO(addressToUpdate, addressDTO);
         // 3. Save updated address in DB
@@ -55,6 +59,9 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public void deleteAddress(Long id) {
+        if(!addressRepository.existsById(id)){
+            throw new ResourceNotFoundException("Address", "ID", id);
+        }
         addressRepository.deleteById(id);
     }
 

@@ -2,6 +2,7 @@ package com.library.libraryapp.service.impl;
 
 import com.library.libraryapp.dto.RegisterDTO;
 import com.library.libraryapp.entity.CheckoutRegister;
+import com.library.libraryapp.exception.ResourceNotFoundException;
 import com.library.libraryapp.mapper.RegisterMapper;
 import com.library.libraryapp.repository.CheckoutRegistryRepository;
 import com.library.libraryapp.service.RegisterService;
@@ -52,7 +53,9 @@ public class RegisterServiceImpl implements RegisterService {
     @Override
     public RegisterDTO getRegisterById(Long id) {
         Optional<CheckoutRegister> checkoutRegisterOptional = checkoutRegistryRepository.findById(id);
-        CheckoutRegister checkoutRegister = checkoutRegisterOptional.get();
+        CheckoutRegister checkoutRegister = checkoutRegisterOptional.orElseThrow(
+                () -> new ResourceNotFoundException("Checkout Register", "ID", id)
+        );
 
         return registerMapper.mapToRegisterDTO(checkoutRegister);
     }
@@ -61,7 +64,9 @@ public class RegisterServiceImpl implements RegisterService {
     public RegisterDTO updateRegister(RegisterDTO registerDTO) {
         // find existing register by ID
         Optional<CheckoutRegister> checkoutRegisterOptional =  checkoutRegistryRepository.findById(registerDTO.getId());
-        CheckoutRegister checkoutRegisterToUpdate = checkoutRegisterOptional.get();
+        CheckoutRegister checkoutRegisterToUpdate = checkoutRegisterOptional.orElseThrow(
+                () -> new ResourceNotFoundException("Checkout Register", "ID", registerDTO.getId())
+        );
 
         // do partial update
         updateCheckoutRegisterFromDTO(checkoutRegisterToUpdate, registerDTO);
@@ -78,6 +83,9 @@ public class RegisterServiceImpl implements RegisterService {
 
     @Override
     public void deleteRegister(Long id) {
+        if(!checkoutRegistryRepository.existsById(id)){
+            throw new ResourceNotFoundException("Checkout Register", "ID", id);
+        }
         checkoutRegistryRepository.deleteById(id);
     }
 
