@@ -132,7 +132,7 @@ public class RegisterServiceImpl implements RegisterService {
 
     private void updateCheckoutRegisterFromDTO(CheckoutRegister checkoutRegisterToUpdate, RegisterDTO registerDTO) {
         // the user can either prolong the due date of the book or record the return of the book
-        if(registerDTO.getReturnDate() != null)
+        if(registerDTO.getDueDate() != null)
             checkoutRegisterToUpdate.setDueDate(LocalDate.parse(registerDTO.getDueDate()));
         if(registerDTO.getReturnDate() != null)
             checkoutRegisterToUpdate.setReturnDate(LocalDate.parse(registerDTO.getReturnDate()));
