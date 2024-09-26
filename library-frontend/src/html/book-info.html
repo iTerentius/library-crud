@@ -6,7 +6,7 @@
         <title>Book Info</title>
     </head>
     <body>
-        <h1>Book Info</h1><!-- insert title and author -->
+        <h1>Book Info: <span id="bookTitleAndAuthor"></span></h1><!-- insert title and author -->
         <form>
             <table>
                 <tr>
@@ -29,31 +29,22 @@
                     <td>Currently Available Copies:</td>
                     <td id="availableCopies"></td>
                 </tr>
-                <tr>
-                    <td>Membership started:</td>
-                    <td id="membershipStarted"></td>
-                </tr>
-                <tr>
-                    <td>Membership ended:</td>
-                    <td id="membershipEnded"></td>
-                </tr>
-                <tr>
-                    <td>Membership status:</td>
-                    <td id="membershipStatus"></td>
-                </tr>
             </table>
         </form>
         <br/><br/>
-            <a href="book-checkout.html">Checkout this Book</a>
-            <a href="#">Current Holders</a>
+            <a id="checkoutLink" href="book-checkout.html">Checkout this Book</a>
+            <a id="currentHoldersLink" href="#">Current Holders</a>
             <a href="#">Checkout History</a>
             <br/><br/>
             <a href="edit-book.html">Edit Book</a>
-            <a href="#">Remove a Copy</a>
+            <div id="currentHoldersContainer"></div>
+            <!-- Display: firstName, lastName, cardNumber (id), checkoutDate, dueDate -->
+            <a id="removeCopyLink" href="#">Remove a Copy</a>
             <a href="#">Add a Copy</a>
         <br/><br/>
         <a href="home.html">Back to Home</a>
         <a href="javascript:history.back()">Back to Previous Page</a>
+        <script src="../assets/scripts/infoBook.js"></script>
     </body>
 
 </html>
